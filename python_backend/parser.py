@@ -78,8 +78,10 @@ def search_company_by_name(company_name):
                                 corp_details["registered_addr_changed"] = changed[1]
                 elif title == "Officer/Director Detail":
                     corp_details["officers"] = []
-                    for span in spans[2:]:
-                        span_text = span.inner_text()
+                    for span in detail_section.inner_text().split("\n"):
+                        if span.strip() == "":
+                            continue
+                        span_text = span
                         if "Title " in span_text:
                             corp_details["officers"].append(
                                 {"title": span_text.split("Title ")[1]}
@@ -89,10 +91,13 @@ def search_company_by_name(company_name):
                                 continue
                             if len(corp_details["officers"][-1]) == 1:
                                 corp_details["officers"][-1]["name"] = span_text
-                            elif len(corp_details["officers"][-1]) == 2:
-                                corp_details["officers"][-1]["address"] = span_text
-                            else:
-                                print("Unknown Officer/Director Detail")
+                            elif len(corp_details["officers"][-1]) > 1:
+                                if "address" not in corp_details["officers"][-1]:
+                                    corp_details["officers"][-1]["address"] = span_text
+                                else:
+                                    corp_details["officers"][-1]["address"] += (
+                                        "\n" + span_text
+                                    )
                 elif title == "Annual Reports":
                     rows = detail_section.locator("tr").all()
                     corp_details["annual_reports"] = []
