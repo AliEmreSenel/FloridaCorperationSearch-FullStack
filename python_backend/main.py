@@ -1,23 +1,66 @@
-from fastapi import Depends, FastAPI
-from sqlalchemy.orm import Session
+import asyncio
+import threading
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session, selectinload
 
-from db import get_db, insert_search_into_db, init_db
-from parser import search_company_by_name
+from db import (
+    get_db,
+    init_db,
+    Corperation,
+    Search,
+    create_new_search,
+    insert_search_into_db,
+    insert_search_error_into_db,
+)
+from parser import search_corperation
 
 
 app = FastAPI(title="Python Backend", version="0.1.0")
 
 
-@app.get("/search/corporation/name/{name}")
-def search_corporation_by_name(name: str, db: Session = Depends(get_db)):
+def save_search_corperation_by_name(name, search_id):
+    """
+    Run a search for a corperation by name.
+    """
     try:
-        info = search_company_by_name(name)
-        insert_search_into_db(db, info)
-    except ValueError as e:
-        return {"status": "error", "message": str(e)}
+        res = asyncio.run(search_corperation(name))
+        insert_search_into_db(search_id, res)
     except Exception as e:
-        return {"status": "error", "message": f"An unexpected error occurred: {e}"}
-    return {"status": "success"}
+        insert_search_error_into_db(search_id, str(e))
+
+
+@app.get("/search/corperation/name/{name}")
+def search_corperation_by_name(name: str):
+    search_id = create_new_search(name)
+    threading.Thread(
+        target=save_search_corperation_by_name, args=(name, search_id)
+    ).start()
+    return {"search_id": search_id}
+
+
+@app.get("/results/{search_id}")
+def get_corperation_details(search_id: str, db: Session = Depends(get_db)):
+    search = (
+        db.query(Search)
+        .filter(Search.id == search_id)
+        .options(
+            selectinload(
+                Search.results,
+                Corperation.filing_info,
+            ),
+            selectinload(Search.results, Corperation.officers),
+            selectinload(Search.results, Corperation.annual_reports),
+            selectinload(Search.results, Corperation.documents),
+        )
+        .first()
+    )
+    if search is None:
+        raise HTTPException(status_code=404, detail="Search not found")
+    if search.search_status == "pending":
+        raise HTTPException(status_code=200, detail="Search still pending")
+    if search.search_status == "error":
+        raise HTTPException(status_code=500, detail=search.error_message)
+    return search.results
 
 
 if __name__ == "__main__":

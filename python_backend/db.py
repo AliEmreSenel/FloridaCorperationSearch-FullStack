@@ -55,6 +55,7 @@ class Document(Base):
 class Corperation(Base):
     __tablename__ = "corperations"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    search_id = Column(Integer, ForeignKey("searches.id"), index=True)
     name = Column(String, index=True)
     type = Column(String)
     filing_info = relationship("FilingInfo", back_populates="corperation")
@@ -69,6 +70,16 @@ class Corperation(Base):
     officers = relationship("Officer", back_populates="corperation")
     annual_reports = relationship("AnnualReport", back_populates="corperation")
     documents = relationship("Document", back_populates="corperation")
+    searches = relationship("Search", back_populates="results")
+
+
+class Search(Base):
+    __tablename__ = "searches"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    search_query = Column(String)
+    search_status = Column(String)
+    error_message = Column(String)
+    results = relationship("Corperation", back_populates="searches")
 
 
 def init_db():
@@ -89,11 +100,26 @@ def get_db():
         db.close()
 
 
-def insert_search_into_db(db, info):
+def create_new_search(search_query):
+    """
+    Create a new search in the database.
+    """
+    db = SessionLocal()
+    search = Search(search_query=search_query, search_status="pending")
+    db.add(search)
+    db.commit()
+    db.refresh(search)
+    db.close()
+    return search.id
+
+
+def insert_search_into_db(search_id, info):
     """
     Insert search results into the database.
     """
+    db = SessionLocal()
     corp = Corperation(
+        search_id=search_id,
         name=info["corp_name"],
         type=info["corp_type"],
         principal_addr=info["principal_addr"],
@@ -155,4 +181,27 @@ def insert_search_into_db(db, info):
         )
     db.commit()
     db.refresh(corp)
-    return corp
+
+    search = db.query(Search).filter(Search.id == search_id).first()
+    if search is None:
+        raise ValueError("Search not found")
+    search.search_status = "completed"
+    search.results = [corp]
+    db.commit()
+    db.refresh(search)
+    db.close()
+
+
+def insert_search_error_into_db(search_id, error_message):
+    """
+    Insert a search error into the database.
+    """
+    db = SessionLocal()
+    search = db.query(Search).filter(Search.id == search_id).first()
+    if search is None:
+        raise ValueError("Search not found")
+    search.search_status = "error"
+    search.error_message = error_message
+    db.commit()
+    db.refresh(search)
+    db.close()
