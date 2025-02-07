@@ -55,12 +55,15 @@ def get_corperation_details(search_id: str, db: Session = Depends(get_db)):
         .first()
     )
     if search is None:
-        raise HTTPException(status_code=404, detail="Search not found")
+        raise HTTPException(
+            status_code=404,
+            detail={"status": "error", "message": "search_id not found"},
+        )
     if search.search_status == "pending":
-        raise HTTPException(status_code=200, detail="Search still pending")
+        raise HTTPException(status_code=200, detail={"status": "pending"})
     if search.search_status == "error":
-        raise HTTPException(status_code=500, detail=search.error_message)
-    return search.results
+        raise HTTPException(status_code=500, detail={"status": search.error_message})
+    return {"status": "completed", "results": search.results}
 
 
 if __name__ == "__main__":

@@ -183,8 +183,6 @@ def insert_search_into_db(search_id, info):
     db.refresh(corp)
 
     search = db.query(Search).filter(Search.id == search_id).first()
-    if search is None:
-        raise ValueError("Search not found")
     search.search_status = "completed"
     search.results = [corp]
     db.commit()
@@ -198,8 +196,6 @@ def insert_search_error_into_db(search_id, error_message):
     """
     db = SessionLocal()
     search = db.query(Search).filter(Search.id == search_id).first()
-    if search is None:
-        raise ValueError("Search not found")
     search.search_status = "error"
     search.error_message = error_message
     db.commit()
