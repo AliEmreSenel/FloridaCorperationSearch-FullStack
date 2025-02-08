@@ -56,14 +56,14 @@ export interface Document {
   title: string;
 }
 
-export async function initialize_crawl(business_name: string) {
+export async function initialize_crawl(business_name: string, num_results: number) {
   try {
     const response = await fetch(`${API_URL}/search/corporations`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: business_name }),
+      body: JSON.stringify({ name: business_name, num_results })
     });
 
     const data = await response.json();
