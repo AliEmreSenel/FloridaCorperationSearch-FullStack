@@ -61,10 +61,8 @@ npm install
 npm run dev
 ```
 
-or 2) Build the app
+or build the app and use the build artifacts in the `out` folder to a static hosting like nginx or apache
 
 ```bash
 npm run build
 ```
-
-3. Copy the build artifacts in the `out` folder into a preffered static hosting like nginx or apache
