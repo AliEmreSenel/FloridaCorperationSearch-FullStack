@@ -113,81 +113,90 @@ def create_new_search(search_query):
     return search.id
 
 
-def insert_search_into_db(search_id, info):
+def insert_search_into_db(search_id, infos):
     """
     Insert search results into the database.
     """
     db = SessionLocal()
-    corp = Corporation(
-        search_id=search_id,
-        name=info["corp_name"],
-        type=info["corp_type"],
-        principal_addr=info["principal_addr"],
-        principal_addr_changed=(
-            info["principal_addr_changed"] if "principal_addr_changed" in info else None
-        ),
-        mailing_addr=info["mailing_addr"],
-        mailing_addr_changed=(
-            info["mailing_addr_changed"] if "mailing_addr_changed" in info else None
-        ),
-        registered_name=info["registered_name"],
-        registered_addr=info["registered_addr"],
-        registered_name_changed=(
-            info["registered_name_changed"]
-            if "registered_name_changed" in info
-            else None
-        ),
-        registered_addr_changed=(
-            info["registered_addr_changed"]
-            if "registered_addr_changed" in info
-            else None
-        ),
-    )
-    db.add(corp)
-    db.commit()
-    for filing_info in info["filing_info"]:
-        db.add(
-            FilingInfo(
-                corp_id=corp.id,
-                internal_name=filing_info["internal_name"],
-                name=filing_info["name"],
-                value=filing_info["value"],
-            )
+    corps = []
+    for info in infos:
+        corp = Corporation(
+            search_id=search_id,
+            name=info["corp_name"],
+            type=info["corp_type"],
+            principal_addr=info["principal_addr"] if "principal_addr" in info else None,
+            principal_addr_changed=(
+                info["principal_addr_changed"]
+                if "principal_addr_changed" in info
+                else None
+            ),
+            mailing_addr=info["mailing_addr"],
+            mailing_addr_changed=(
+                info["mailing_addr_changed"] if "mailing_addr_changed" in info else None
+            ),
+            registered_name=(
+                info["registered_name"] if "registered_name" in info else None
+            ),
+            registered_addr=(
+                info["registered_addr"] if "registered_addr" in info else None
+            ),
+            registered_name_changed=(
+                info["registered_name_changed"]
+                if "registered_name_changed" in info
+                else None
+            ),
+            registered_addr_changed=(
+                info["registered_addr_changed"]
+                if "registered_addr_changed" in info
+                else None
+            ),
         )
-    if "officers" in info:
-        for officer in info["officers"]:
+        db.add(corp)
+        db.commit()
+        for filing_info in info["filing_info"]:
             db.add(
-                Officer(
+                FilingInfo(
                     corp_id=corp.id,
-                    title=officer["title"],
-                    name=(officer["name"] if "name" in officer else None),
-                    address=(officer["address"] if "address" in officer else None),
+                    internal_name=filing_info["internal_name"],
+                    name=filing_info["name"],
+                    value=filing_info["value"],
                 )
             )
-    if "annual_reports" in info:
-        for report in info["annual_reports"]:
-            db.add(
-                AnnualReport(
-                    corp_id=corp.id,
-                    report_year=report["report_year"],
-                    filing_date=report["filing_date"],
+        if "officers" in info:
+            for officer in info["officers"]:
+                db.add(
+                    Officer(
+                        corp_id=corp.id,
+                        title=officer["title"],
+                        name=(officer["name"] if "name" in officer else None),
+                        address=(officer["address"] if "address" in officer else None),
+                    )
                 )
-            )
-    if "documents" in info:
-        for document in info["documents"]:
-            db.add(
-                Document(
-                    corp_id=corp.id,
-                    title=document["title"],
-                    link=document["link"],
+        if "annual_reports" in info:
+            for report in info["annual_reports"]:
+                db.add(
+                    AnnualReport(
+                        corp_id=corp.id,
+                        report_year=report["report_year"],
+                        filing_date=report["filing_date"],
+                    )
                 )
-            )
-    db.commit()
-    db.refresh(corp)
+        if "documents" in info:
+            for document in info["documents"]:
+                db.add(
+                    Document(
+                        corp_id=corp.id,
+                        title=document["title"],
+                        link=document["link"],
+                    )
+                )
+        db.commit()
+        db.refresh(corp)
+        corps.append(corp)
 
     search = db.query(Search).filter(Search.id == search_id).first()
     search.search_status = "completed"
-    search.results = [corp]
+    search.results = corps
     db.commit()
     db.refresh(search)
     db.close()

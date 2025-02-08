@@ -34,12 +34,12 @@ app.add_middleware(
 )
 
 
-def save_search_corporation_by_name(name, search_id):
+def save_search_corporation_by_name(name, search_id, num_results):
     """
     Run a search for a corporation by name.
     """
     try:
-        res = asyncio.run(search_corporation(name))
+        res = asyncio.run(search_corporation(name, num_results))
         insert_search_into_db(search_id, res)
     except Exception as e:
         insert_search_error_into_db(search_id, str(e))
@@ -47,6 +47,7 @@ def save_search_corporation_by_name(name, search_id):
 
 class CorporationSearchRequest(BaseModel):
     name: str
+    num_results: int = 1
 
 
 @app.post(
@@ -63,7 +64,8 @@ def search_corporation_by_name(search_data: CorporationSearchRequest):
             detail=f"Error creating new search {e}",
         )
     threading.Thread(
-        target=save_search_corporation_by_name, args=(search_data.name, search_id)
+        target=save_search_corporation_by_name,
+        args=(search_data.name, search_id, search_data.num_results),
     ).start()
     return {"search_id": search_id}
 

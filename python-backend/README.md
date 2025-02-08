@@ -14,6 +14,7 @@ Content-Type: application/json
 
 {
   "name": "string"
+  "num_results": "int(optional)"
 }
 ```
 
