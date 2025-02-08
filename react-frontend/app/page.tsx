@@ -1,8 +1,8 @@
 "use client"
 import { useState, useEffect } from 'react';
 import SearchForm from './components/search_form';
-import ResultsTable from './components/results_table';
 import { get_search_results } from './api/search';
+import ResultsDisplay from './components/results_display';
 
 const POLL_INTERVAL = 1000; // 3 seconds
 
@@ -59,7 +59,7 @@ export default function Home() {
       {error && (
         <p className='mt-4 text-red-500'>Error while searching: {errorMessage}</p>
       )}
-      <ResultsTable results={results} />
+      <ResultsDisplay results={results} />
     </div>
   );
 }

@@ -3,11 +3,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 export interface ApiResponse {
   status: string;
-  results: Corperation[] | null;
+  results: Corporation[] | null;
   message: string | null;
 }
 
-export interface Corperation {
+export interface Corporation {
   id: number;
   type: string;
   principal_addr_changed: string | null;
@@ -58,7 +58,7 @@ export interface Document {
 
 export async function initialize_crawl(business_name: string) {
   try {
-    const response = await fetch(`${API_URL}/search/corperations`, {
+    const response = await fetch(`${API_URL}/search/corporations`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

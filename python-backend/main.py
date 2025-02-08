@@ -6,14 +6,14 @@ from pydantic import BaseModel
 from starlette.status import HTTP_404_NOT_FOUND
 from db import (
     get_db,
-    Corperation,
+    Corporation,
     Search,
     create_new_search,
     init_db,
     insert_search_into_db,
     insert_search_error_into_db,
 )
-from parser import search_corperation
+from parser import search_corporation
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -34,27 +34,27 @@ app.add_middleware(
 )
 
 
-def save_search_corperation_by_name(name, search_id):
+def save_search_corporation_by_name(name, search_id):
     """
-    Run a search for a corperation by name.
+    Run a search for a corporation by name.
     """
     try:
-        res = asyncio.run(search_corperation(name))
+        res = asyncio.run(search_corporation(name))
         insert_search_into_db(search_id, res)
     except Exception as e:
         insert_search_error_into_db(search_id, str(e))
 
 
-class CorperationSearchRequest(BaseModel):
+class CorporationSearchRequest(BaseModel):
     name: str
 
 
 @app.post(
-    "/search/corperations",
+    "/search/corporations",
     status_code=status.HTTP_202_ACCEPTED,
-    description="Create a new search for finding corperation",
+    description="Create a new search for finding corporation",
 )
-def search_corperation_by_name(search_data: CorperationSearchRequest):
+def search_corporation_by_name(search_data: CorporationSearchRequest):
     try:
         search_id = create_new_search(search_data.name)
     except Exception as e:
@@ -63,7 +63,7 @@ def search_corperation_by_name(search_data: CorperationSearchRequest):
             detail=f"Error creating new search {e}",
         )
     threading.Thread(
-        target=save_search_corperation_by_name, args=(search_data.name, search_id)
+        target=save_search_corporation_by_name, args=(search_data.name, search_id)
     ).start()
     return {"search_id": search_id}
 
@@ -71,18 +71,18 @@ def search_corperation_by_name(search_data: CorperationSearchRequest):
 @app.get(
     "/results/{search_id}", description="Retrieve the results of a search by search_id"
 )
-def get_corperation_details(search_id: str, db: Session = Depends(get_db)):
+def get_corporation_details(search_id: str, db: Session = Depends(get_db)):
     search = (
         db.query(Search)
         .filter(Search.id == search_id)
         .options(
             selectinload(
                 Search.results,
-                Corperation.filing_info,
+                Corporation.filing_info,
             ),
-            selectinload(Search.results, Corperation.officers),
-            selectinload(Search.results, Corperation.annual_reports),
-            selectinload(Search.results, Corperation.documents),
+            selectinload(Search.results, Corporation.officers),
+            selectinload(Search.results, Corporation.annual_reports),
+            selectinload(Search.results, Corporation.documents),
         )
         .first()
     )

@@ -1,7 +1,7 @@
 from playwright.async_api import async_playwright
 
 
-async def search_corperation(company_name):
+async def search_corporation(company_name):
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
         page = await browser.new_page()
@@ -134,4 +134,4 @@ async def search_corperation(company_name):
 
 
 if __name__ == "__main__":
-    print(search_corperation("Fighters, Inc"))
+    print(search_corporation("Fighters, Inc"))

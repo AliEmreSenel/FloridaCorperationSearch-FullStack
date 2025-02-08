@@ -1,6 +1,6 @@
-# Florida Corperation Search
+# Florida Corporation Search
 
-This project is a basic full stack app that lets the user search for corperations in Florida by name and shows them the details of the corperation in a easy to understand display.
+This project is a basic full stack app that lets the user search for corporations in Florida by name and shows them the details of the corporation in a easy to understand display.
 
 For more details about the tech stack, check out the README's in both [backend](/python-backend/README.md) and [frontend](/react-frontend/README.md).
 

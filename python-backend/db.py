@@ -17,48 +17,48 @@ Base = declarative_base()
 class FilingInfo(Base):
     __tablename__ = "filing_info"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    corp_id = Column(Integer, ForeignKey("corperations.id"), index=True)
+    corp_id = Column(Integer, ForeignKey("corporations.id"), index=True)
     internal_name = Column(String)
     name = Column(String)
     value = Column(String)
-    corperation = relationship("Corperation", back_populates="filing_info")
+    corporation = relationship("Corporation", back_populates="filing_info")
 
 
 class Officer(Base):
     __tablename__ = "officers"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    corp_id = Column(Integer, ForeignKey("corperations.id"), index=True)
+    corp_id = Column(Integer, ForeignKey("corporations.id"), index=True)
     title = Column(String)
     name = Column(String)
     address = Column(String)
-    corperation = relationship("Corperation", back_populates="officers")
+    corporation = relationship("Corporation", back_populates="officers")
 
 
 class AnnualReport(Base):
     __tablename__ = "annual_reports"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    corp_id = Column(Integer, ForeignKey("corperations.id"), index=True)
+    corp_id = Column(Integer, ForeignKey("corporations.id"), index=True)
     report_year = Column(Integer)
     filing_date = Column(String)
-    corperation = relationship("Corperation", back_populates="annual_reports")
+    corporation = relationship("Corporation", back_populates="annual_reports")
 
 
 class Document(Base):
     __tablename__ = "documents"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    corp_id = Column(Integer, ForeignKey("corperations.id"), index=True)
+    corp_id = Column(Integer, ForeignKey("corporations.id"), index=True)
     title = Column(String)
     link = Column(String)
-    corperation = relationship("Corperation", back_populates="documents")
+    corporation = relationship("Corporation", back_populates="documents")
 
 
-class Corperation(Base):
-    __tablename__ = "corperations"
+class Corporation(Base):
+    __tablename__ = "corporations"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     search_id = Column(Integer, ForeignKey("searches.id"), index=True)
     name = Column(String, index=True)
     type = Column(String)
-    filing_info = relationship("FilingInfo", back_populates="corperation")
+    filing_info = relationship("FilingInfo", back_populates="corporation")
     principal_addr = Column(String)
     principal_addr_changed = Column(String)
     mailing_addr = Column(String)
@@ -67,9 +67,9 @@ class Corperation(Base):
     registered_addr = Column(String)
     registered_name_changed = Column(String)
     registered_addr_changed = Column(String)
-    officers = relationship("Officer", back_populates="corperation")
-    annual_reports = relationship("AnnualReport", back_populates="corperation")
-    documents = relationship("Document", back_populates="corperation")
+    officers = relationship("Officer", back_populates="corporation")
+    annual_reports = relationship("AnnualReport", back_populates="corporation")
+    documents = relationship("Document", back_populates="corporation")
     searches = relationship("Search", back_populates="results")
 
 
@@ -79,7 +79,7 @@ class Search(Base):
     search_query = Column(String)
     search_status = Column(String)
     error_message = Column(String)
-    results = relationship("Corperation", back_populates="searches")
+    results = relationship("Corporation", back_populates="searches")
 
 
 def init_db():
@@ -118,7 +118,7 @@ def insert_search_into_db(search_id, info):
     Insert search results into the database.
     """
     db = SessionLocal()
-    corp = Corperation(
+    corp = Corporation(
         search_id=search_id,
         name=info["corp_name"],
         type=info["corp_type"],
