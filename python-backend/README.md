@@ -6,7 +6,7 @@ This is the backend for the Florida Corporation Search Project. It uses `playwri
 
 ### Search
 
-Used to start a crawl for the specified company
+Used to start a crawl for the specified corporation
 
 ```http
 POST /search/corporations
@@ -41,16 +41,20 @@ GET /results/{search_id}
 
 Response:
 
-Success: 200 OK
+- Success: 200 OK
+
 Returns the list of companies
 
-Success: 202 Accepted
+- Success: 202 Accepted
+
 Search is still in progress
 
-Error: 404 Not Found
+- Error: 404 Not Found
+
 Search ID Not Found
 
-Error: 500 Internal Server Error
+- Error: 500 Internal Server Error
+
 There was an error while processing the search
 
 ```json
