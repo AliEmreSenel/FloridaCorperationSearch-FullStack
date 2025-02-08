@@ -111,7 +111,7 @@ async def search_corperation(company_name):
                         corp_details["annual_reports"].append(
                             {
                                 "report_year": await cells[0].inner_text(),
-                                "filed_date": await cells[1].inner_text(),
+                                "filing_date": await cells[1].inner_text(),
                             }
                         )
                 elif title == "Document Images":
