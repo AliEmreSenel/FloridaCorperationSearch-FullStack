@@ -18,6 +18,8 @@ async def search_corperation(company_name):
         links = await page.locator("#search-results tbody tr a").element_handles()
         if len(links) > 0:
             await links[0].click()
+        else:
+            raise ValueError("Search returned no results")
 
         # Parse Detail Page
         corp_details = {}
