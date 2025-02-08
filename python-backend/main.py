@@ -13,9 +13,24 @@ from db import (
     insert_search_error_into_db,
 )
 from parser import search_corperation
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(title="Python Backend", version="0.1.0")
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def save_search_corperation_by_name(name, search_id):
