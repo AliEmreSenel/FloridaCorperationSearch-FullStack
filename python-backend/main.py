@@ -1,6 +1,6 @@
 import asyncio
 import threading
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 from sqlalchemy.orm import Session, selectinload
 
 from db import (
@@ -70,14 +70,11 @@ def get_corperation_details(search_id: str, db: Session = Depends(get_db)):
         .first()
     )
     if search is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"status": "error", "message": "search_id not found"},
-        )
+        return {"status": "error", "message": "search_id not found"}
     if search.search_status == "pending":
-        raise HTTPException(status_code=200, detail={"status": "pending"})
+        return {"status": "pending"}
     if search.search_status == "error":
-        raise HTTPException(status_code=500, detail={"status": search.error_message})
+        return {"status": "error", "message": search.error_message}
     return {"status": "completed", "results": search.results}
 
 
