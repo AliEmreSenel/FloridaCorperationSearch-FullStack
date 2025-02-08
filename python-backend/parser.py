@@ -31,6 +31,10 @@ async def search_corporation(company_name, num_results=1):
                 if len(paragraphs) == 2:
                     corp_details["corp_type"] = await paragraphs[0].inner_text()
                     corp_details["corp_name"] = await paragraphs[1].inner_text()
+                    if (
+                        corp_details["corp_type"] == "Trademark"
+                    ):  # Trademarks have a different format and thus out of scope
+                        break
                     continue
 
                 spans = await detail_section.locator("span").all()
@@ -58,7 +62,8 @@ async def search_corporation(company_name, num_results=1):
                         if len(spans) > 2:
                             changed = (await spans[2].inner_text()).split("Changed: ")
                             if len(changed) != 2:
-                                raise ValueError("Changed date is invalid")
+                                continue
+                            #                                raise ValueError("Changed date is invalid")
                             corp_details["principal_addr_changed"] = changed[1]
                     elif title == "Mailing Address":
                         if len(spans) > 1:
@@ -66,7 +71,8 @@ async def search_corporation(company_name, num_results=1):
                         if len(spans) > 2:
                             changed = (await spans[2].inner_text()).split("Changed: ")
                             if len(changed) != 2:
-                                raise ValueError("Changed date is invalid")
+                                continue
+                            #                                raise ValueError("Changed date is invalid")
                             corp_details["mailing_addr_changed"] = changed[1]
                     elif title == "Registered Agent Name & Address":
                         if len(spans) > 2:
@@ -80,7 +86,8 @@ async def search_corporation(company_name, num_results=1):
                             for span in spans[3:]:
                                 changed = (await span.inner_text()).split(" Changed: ")
                                 if len(changed) != 2:
-                                    raise ValueError("Changed date is invalid")
+                                    continue
+                                #                                    raise ValueError("Changed date is invalid")
                                 if changed[0] == "Name":
                                     corp_details["registered_name_changed"] = changed[1]
                                 if changed[0] == "Address":
@@ -140,7 +147,8 @@ async def search_corporation(company_name, num_results=1):
                                     "link": f"https://search.sunbiz.org/{await report_link.get_attribute("href")}",
                                 }
                             )
-            corps.append(corp_details)
+            else:
+                corps.append(corp_details)
             next_page_link = await page.locator(
                 'a[title="Next On List"]'
             ).element_handles()
