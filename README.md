@@ -22,7 +22,7 @@ This method is easily replicatable and quick to set up
 
 Create a new user and database for the app to use.
 
-By default the app uses the backend user with password backend on and connects to the postgresql server running locally on the default port.
+By default the app uses the username `backend` with password `backend` and connects to the postgresql server running locally on the default port.
 
 This behavior can be changed using the `DATABASE_URL` environment variable
 
