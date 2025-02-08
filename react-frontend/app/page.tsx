@@ -8,7 +8,7 @@ const POLL_INTERVAL = 1000; // 3 seconds
 
 export default function Home() {
   const [results, setResults] = useState([]);
-  const [searchId, setSearchId] = useState(null);
+  const [searchId, setSearchId] = useState("");
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -18,33 +18,32 @@ export default function Home() {
 
     setSearching(true);
     setError(false);
-    const interval = setInterval(async () => {
-      await get_search_results(searchId).then(res => res.data).then(data => {
-        if (data.status == "error") {
-          setSearching(false);
-          setError(true);
-          setResults([]);
-          if (data.message) {
-            setErrorMessage(data.message);
-          } else {
-            setErrorMessage("Unknown error occured");
-          }
-          clearInterval(interval);
-        } else if (data.status == "pending") {
 
-        } else if (data.results && data.results.length > 0) {
-          setResults(data.results);
+    const interval = setInterval(async () => {
+      try {
+        const data = await get_search_results(searchId);
+
+        if (data.detail) {
+          if (data.detail === "pending") {
+            return;
+          }
+          setError(true);
+          setErrorMessage(data.detail);
+          setResults([]);
+          setSearching(false);
+          clearInterval(interval);
+        } else if (data.length > 0) {
+          setResults(data);
           setSearching(false);
           clearInterval(interval);
         }
-      }).catch(err => {
-        setSearching(false);
+      } catch (error: any) {
         setError(true);
-        setErrorMessage(err.message);
+        setErrorMessage(error.message);
         setResults([]);
-        clearInterval(interval)
-      })
-
+        setSearching(false);
+        clearInterval(interval);
+      }
     }, POLL_INTERVAL);
 
     return () => clearInterval(interval);
@@ -53,7 +52,7 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Florida Business Search</h1>
-      <SearchForm onSearchStarted={setSearchId} />
+      <SearchForm onSearchStarted={setSearchId} setErrorMessage={setErrorMessage} setError={setError} />
       {searching && (
         <p className="mt-4 text-blue-500">Searching... Please wait.</p>
       )}

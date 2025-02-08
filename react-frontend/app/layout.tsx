@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Florida Corperation Search",
   description: "Custom search user interface with custom backend for Florida Corperation Search",
+
 };
 
 export default function RootLayout({

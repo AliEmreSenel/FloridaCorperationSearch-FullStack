@@ -154,31 +154,34 @@ def insert_search_into_db(search_id, info):
                 value=filing_info["value"],
             )
         )
-    for officer in info["officers"]:
-        db.add(
-            Officer(
-                corp_id=corp.id,
-                title=officer["title"],
-                name=(officer["name"] if "name" in officer else None),
-                address=(officer["address"] if "address" in officer else None),
+    if "officers" in info:
+        for officer in info["officers"]:
+            db.add(
+                Officer(
+                    corp_id=corp.id,
+                    title=officer["title"],
+                    name=(officer["name"] if "name" in officer else None),
+                    address=(officer["address"] if "address" in officer else None),
+                )
             )
-        )
-    for report in info["annual_reports"]:
-        db.add(
-            AnnualReport(
-                corp_id=corp.id,
-                report_year=report["report_year"],
-                filing_date=report["filing_date"],
+    if "annual_reports" in info:
+        for report in info["annual_reports"]:
+            db.add(
+                AnnualReport(
+                    corp_id=corp.id,
+                    report_year=report["report_year"],
+                    filing_date=report["filing_date"],
+                )
             )
-        )
-    for document in info["documents"]:
-        db.add(
-            Document(
-                corp_id=corp.id,
-                title=document["title"],
-                link=document["link"],
+    if "documents" in info:
+        for document in info["documents"]:
+            db.add(
+                Document(
+                    corp_id=corp.id,
+                    title=document["title"],
+                    link=document["link"],
+                )
             )
-        )
     db.commit()
     db.refresh(corp)
 

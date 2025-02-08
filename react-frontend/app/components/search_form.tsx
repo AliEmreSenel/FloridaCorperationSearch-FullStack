@@ -1,26 +1,30 @@
 "use client"
-import { useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { initialize_crawl } from "../api/search";
 
-export default function SearchForm({ onSearchStarted }) {
+export default function SearchForm({ onSearchStarted, setError, setErrorMessage }: { onSearchStarted: Dispatch<SetStateAction<string>>, setError: Dispatch<SetStateAction<boolean>>, setErrorMessage: Dispatch<SetStateAction<string>> }) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = async (e) => {
+  const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const data = await initialize_crawl(query);
-    if (data.search_id) {
-      onSearchStarted(data.search_id);  // Pass search_id to parent
-    } else {
-      alert("Error starting search. Please try again.");
+    try {
+      const data = await initialize_crawl(query);
+      if (data.search_id) {
+        onSearchStarted(data.search_id); // Pass search_id to parent
+      } else {
+        setError(true);
+        setErrorMessage("Error starting search. Please try again.");
+      }
+    } catch (error: any) {
+      setError(true);
+      setErrorMessage(error.message);
     }
 
     setLoading(false);
   };
-
-
   return (
     <form onSubmit={handleSearch} className="flex items-center">
       <input

@@ -1,8 +1,10 @@
-function getFilingValue(filings, id) {
-  return filings.find(f => f["internal_name"] == id).value;
+import { Corperation, FilingInfo } from "../api/search";
+
+function getFilingValue(filings: FilingInfo[], id: string) {
+  return filings.find((f: FilingInfo) => f["internal_name"] == id)?.value || 'N/A';
 }
 
-export default function ResultsTable({ results }) {
+export default function ResultsTable({ results }: { results: Corperation[] }) {
   if (!results || results.length === 0) {
     return null;
   }

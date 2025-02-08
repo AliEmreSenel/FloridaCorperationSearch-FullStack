@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: backend
+      POSTGRES_PASSWORD: backend
+      POSTGRES_DB: corperate_info_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  backend:
+    build: ./python-backend
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://backend:backend@db:5432/corperate_info_db
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+  frontend:
+    build:
+      context: ./react-frontend
+      args:
+        NEXT_PUBLIC_API_URL: "http://localhost:8000"
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:
+
